@@ -47,6 +47,10 @@ class Ride
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updateAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'rides')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $conducteur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -180,6 +184,18 @@ class Ride
     public function setUpdateAt(?\DateTimeImmutable $updateAt): static
     {
         $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    public function getConducteur(): ?User
+    {
+        return $this->conducteur;
+    }
+
+    public function setConducteur(?User $conducteur): static
+    {
+        $this->conducteur = $conducteur;
 
         return $this;
     }
