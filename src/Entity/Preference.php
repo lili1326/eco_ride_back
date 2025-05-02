@@ -23,6 +23,9 @@ class Preference
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updateAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'preferences')]
+    private ?User $utilisateur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +63,18 @@ class Preference
     public function setUpdateAt(?\DateTimeImmutable $updateAt): static
     {
         $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?User
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?User $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }

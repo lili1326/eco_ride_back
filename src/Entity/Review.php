@@ -23,6 +23,17 @@ class Review
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'reviews')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $auteur = null;
+
+    #[ORM\ManyToOne(inversedBy: 'reviews')]
+    private ?User $conducteur = null;
+
+    #[ORM\ManyToOne(inversedBy: 'reviews')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $covoiturage = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +71,42 @@ class Review
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getAuteur(): ?User
+    {
+        return $this->auteur;
+    }
+
+    public function setAuteur(?User $auteur): static
+    {
+        $this->auteur = $auteur;
+
+        return $this;
+    }
+
+    public function getConducteur(): ?User
+    {
+        return $this->conducteur;
+    }
+
+    public function setConducteur(?User $conducteur): static
+    {
+        $this->conducteur = $conducteur;
+
+        return $this;
+    }
+
+    public function getCovoiturage(): ?User
+    {
+        return $this->covoiturage;
+    }
+
+    public function setCovoiturage(?User $covoiturage): static
+    {
+        $this->covoiturage = $covoiturage;
 
         return $this;
     }
