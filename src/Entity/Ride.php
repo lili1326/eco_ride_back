@@ -3,8 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\RideRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
+
 
 #[ORM\Entity(repositoryClass: RideRepository::class)]
 class Ride
@@ -12,44 +17,69 @@ class Ride
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['ride:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $date_depart = null;
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $heure_depart = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?string $lieu_depart = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $date_arrivee = null;
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $heure_arrivee = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?string $lieu_arrivee = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?int $note_conducteur = null;
 
     #[ORM\Column]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?int $nb_place = null;
 
     #[ORM\Column]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?int $prix_personne = null;
 
     #[ORM\Column]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?\DateTimeImmutable $updateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'rides')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['ride:read'])]
+    #[MaxDepth(1)]
     private ?User $conducteur = null;
+
+    /**
+     * @var Collection<int, Participe>
+     */
+    #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'covoiturage')]
+    private Collection $participes;
+
+    public function __construct()
+    {
+        $this->participes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -196,6 +226,36 @@ class Ride
     public function setConducteur(?User $conducteur): static
     {
         $this->conducteur = $conducteur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Participe>
+     */
+    public function getParticipes(): Collection
+    {
+        return $this->participes;
+    }
+
+    public function addParticipe(Participe $participe): static
+    {
+        if (!$this->participes->contains($participe)) {
+            $this->participes->add($participe);
+            $participe->setCovoiturage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipe(Participe $participe): static
+    {
+        if ($this->participes->removeElement($participe)) {
+            // set the owning side to null (unless already changed)
+            if ($participe->getCovoiturage() === $this) {
+                $participe->setCovoiturage(null);
+            }
+        }
 
         return $this;
     }

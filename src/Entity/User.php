@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -16,9 +17,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['ride:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['ride:read'])]
     private ?string $email = null;
 
     /**
@@ -34,6 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['ride:read'])]
     private ?string $pseudo = null;
 
     #[ORM\Column]
@@ -69,6 +73,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'auteur', orphanRemoval: true)]
     private Collection $reviews;
 
+    /**
+     * @var Collection<int, Participe>
+     */
+    #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'utilisateur')]
+    private Collection $participes;
+
+    #[ORM\Column(length: 255)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $lastName = null;
+
      /** @throws \Exception */
      public function __construct()
      {
@@ -77,6 +93,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
          $this->rides = new ArrayCollection();
          $this->preferences = new ArrayCollection();
          $this->reviews = new ArrayCollection();
+         $this->participes = new ArrayCollection();
      }
 
     public function getId(): ?int
@@ -316,6 +333,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $review->setAuteur(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Participe>
+     */
+    public function getParticipes(): Collection
+    {
+        return $this->participes;
+    }
+
+    public function addParticipe(Participe $participe): static
+    {
+        if (!$this->participes->contains($participe)) {
+            $this->participes->add($participe);
+            $participe->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipe(Participe $participe): static
+    {
+        if ($this->participes->removeElement($participe)) {
+            // set the owning side to null (unless already changed)
+            if ($participe->getUtilisateur() === $this) {
+                $participe->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): static
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
 
         return $this;
     }
