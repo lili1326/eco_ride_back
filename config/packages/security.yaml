@@ -19,6 +19,11 @@ security:
       custom_authenticator: App\Security\ApiTokenAuthenticator
       json_login:
         check_path: app_api_login
+    api:
+      pattern: ^/api
+      stateless: true
+      provider: app_user_provider
+      custom_authenticator: App\Security\ApiTokenAuthenticator
 
       # activate different ways to authenticate
       # https://symfony.com/doc/current/security.html#the-firewall
@@ -34,8 +39,8 @@ security:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/doc, roles: PUBLIC_ACCESS }
-    - { path: ^/api/doc, roles: PUBLIC_ACCESS }
     - { path: ^/api, roles: ROLE_USER }
+    - { path: ^/api/ride, roles: ROLE_USER }
 when@test:
   security:
     password_hashers:
