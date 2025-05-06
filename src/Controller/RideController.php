@@ -182,7 +182,21 @@ final class RideController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
     
-
+    #[Route('/public/rides', name: 'public_rides', methods: ['GET'])]
+    public function getPublicRides(
+        Request $request,
+        RideRepository $rideRepository,
+        SerializerInterface $serializer
+    ): JsonResponse {
+        $depart = $request->query->get('depart');
+        $arrivee = $request->query->get('arrivee');
+        $date = $request->query->get('date');
+    
+        $rides = $rideRepository->findByCriteria($depart, $arrivee, $date);
+    
+        $json = $serializer->serialize($rides, 'json', ['groups' => 'ride:read']);
+        return new JsonResponse($json, 200, [], true); // le `true` ici permet d'envoyer du JSON déjà sérialisé
+    }
 
 
 }

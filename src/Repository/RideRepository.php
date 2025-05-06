@@ -40,4 +40,29 @@ class RideRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+
+//POUR AFFICHER TOUS LES TRAJETS
+public function findByCriteria(?string $depart, ?string $arrivee, ?string $date): array
+{
+    $qb = $this->createQueryBuilder('r');
+
+    if ($depart) {
+        $qb->andWhere('r.lieu_depart LIKE :depart')
+           ->setParameter('depart', '%' . $depart . '%');
+    }
+
+    if ($arrivee) {
+        $qb->andWhere('r.lieu_arrivee LIKE :arrivee')
+           ->setParameter('arrivee', '%' . $arrivee . '%');
+    }
+
+    if ($date) {
+        $qb->andWhere('r.date_depart = :date')
+           ->setParameter('date', new \DateTimeImmutable($date));
+    }
+
+    return $qb->orderBy('r.date_depart', 'ASC')->getQuery()->getResult();
+}
+
 }
