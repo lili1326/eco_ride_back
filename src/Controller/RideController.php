@@ -16,7 +16,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface; 
 
 
- use App\Entity\User;
 
  #[Route('/api/ride', name: 'app_api_ride_')]
 final class RideController extends AbstractController
@@ -123,12 +122,8 @@ final class RideController extends AbstractController
     
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
-
-<<<<<<< HEAD
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
-=======
     #[Route('/{id<\d+>}', name: 'edit', methods: 'PUT')]
->>>>>>> dev
+
     public function edit(int $id, Request $request): JsonResponse
     {
         $ride = $this->repository->find($id);
@@ -174,30 +169,20 @@ final class RideController extends AbstractController
         if (!$user) {
             return new JsonResponse(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
         }
-<<<<<<< HEAD
     
         $rides = $this->repository->findBy(['conducteur' => $user]);
     
-=======
-
-        $rides = $this->repository->findBy(['conducteur' => $user]);
-
->>>>>>> dev
+     
         $json = $this->serializer->serialize(
             $rides,
             'json',
             ['groups' => ['ride:read'], 'enable_max_depth' => true]
         );
-<<<<<<< HEAD
-    
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
-    }
-    
-=======
+
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
->>>>>>> dev
+
     #[Route('/public/rides', name: 'public_rides', methods: ['GET'])]
     public function getPublicRides(
         Request $request,
@@ -214,8 +199,5 @@ final class RideController extends AbstractController
         return new JsonResponse($json, 200, [], true); // le `true` ici permet d'envoyer du JSON déjà sérialisé
     }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> dev
 }
