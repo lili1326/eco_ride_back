@@ -5,36 +5,58 @@ namespace App\Entity;
 use App\Repository\CarRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+ 
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CarRepository::class)]
+ 
 class Car
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['car:read', 'car:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['car:read', 'car:write'])]
     private ?string $marque = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['car:read', 'car:write'])]
     private ?string $modele = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    #[Groups(['car:read', 'car:write'])]
     private ?\DateTimeImmutable $date_premiere_immatriculation = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['car:read', 'car:write'])]
     private ?string $immatriculation = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['car:read', 'car:write'])]
     private ?string $couleur = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['car:read', 'car:write'])]
     private ?string $energie = null;
 
     #[ORM\ManyToOne(inversedBy: 'cars')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
+
+    #[ORM\Column]
+    #[Groups(['car:read', 'car:write'])]
+    private ?int $nb_places = null;
+
+    #[ORM\Column]
+    #[Groups(['car:read', 'car:write'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['car:read', 'car:write'])]
+    private ?\DateTimeImmutable $updateAt = null;
 
     public function getId(): ?int
     {
@@ -121,6 +143,42 @@ class Car
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getNbPlaces(): ?int
+    {
+        return $this->nb_places;
+    }
+
+    public function setNbPlaces(int $nb_places): static
+    {
+        $this->nb_places = $nb_places;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdateAt(): ?\DateTimeImmutable
+    {
+        return $this->updateAt;
+    }
+
+    public function setUpdateAt(?\DateTimeImmutable $updateAt): static
+    {
+        $this->updateAt = $updateAt;
 
         return $this;
     }

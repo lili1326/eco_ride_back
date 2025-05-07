@@ -40,6 +40,11 @@ security:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+<<<<<<< HEAD
+=======
+    - { path: ^/api/car/mes-vehicules, roles: ROLE_USER }
+    - { path: ^/api/car, roles: ROLE_USER }
+>>>>>>> dev
     - { path: ^/api, roles: ROLE_USER }
     - { path: ^/api/ride, roles: ROLE_USER }
 
