@@ -32,10 +32,7 @@ class Ride
     #[Groups(['ride:read', 'ride:write'])]
     private ?string $lieu_depart = null;
 
-<<<<<<< HEAD
-=======
    
->>>>>>> dev
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
     #[Groups(['ride:read', 'ride:write'])] 
@@ -126,11 +123,7 @@ class Ride
         return $this;
     }
 
-<<<<<<< HEAD
-    
-=======
    
->>>>>>> dev
 
     public function getHeureArrivee(): ?\DateTimeImmutable
     {

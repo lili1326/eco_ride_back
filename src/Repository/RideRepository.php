@@ -40,11 +40,6 @@ class RideRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> dev
 //POUR AFFICHER TOUS LES TRAJETS
 public function findByCriteria(?string $depart, ?string $arrivee, ?string $date): array
 {
