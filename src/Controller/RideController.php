@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface; 
 
- use App\Entity\User;
+  
 
 #[Route('/api/ride', name: 'app_api_ride_')]
 final class RideController extends AbstractController

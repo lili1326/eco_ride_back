@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PreferenceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PreferenceRepository::class)]
 class Preference
@@ -12,19 +13,35 @@ class Preference
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['preference:read', 'preference:write'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT )]
+    #[Groups(['preference:read', 'preference:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['preference:read', 'preference:write'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['preference:read', 'preference:write'])]
     private ?\DateTimeImmutable $updateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'preferences')]
     private ?User $utilisateur = null;
+
+    #[ORM\Column(length: 255 )]
+    #[Groups(['preference:read', 'preference:write'])]
+    private ?string $musique = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['preference:read', 'preference:write'])]
+    private ?string $fumeur = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['preference:read', 'preference:write'])]
+    private ?string $animaux = null;
 
     public function getId(): ?int
     {
@@ -75,6 +92,42 @@ class Preference
     public function setUtilisateur(?User $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getMusique(): ?string
+    {
+        return $this->musique;
+    }
+
+    public function setMusique(?string $musique): static
+    {
+        $this->musique = $musique;
+
+        return $this;
+    }
+
+    public function getFumeur(): ?string
+    {
+        return $this->fumeur;
+    }
+
+    public function setFumeur(string $fumeur): static
+    {
+        $this->fumeur = $fumeur;
+
+        return $this;
+    }
+
+    public function getAnimaux(): ?string
+    {
+        return $this->animaux;
+    }
+
+    public function setAnimaux(string $animaux): static
+    {
+        $this->animaux = $animaux;
 
         return $this;
     }
