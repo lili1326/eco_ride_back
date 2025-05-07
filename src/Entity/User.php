@@ -17,11 +17,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['ride:read'])]
+     
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['ride:read'])]
+    
     private ?string $email = null;
 
     /**
@@ -37,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['ride:read'])]
+    
     private ?string $pseudo = null;
 
     #[ORM\Column]
@@ -80,9 +80,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $participes;
 
     #[ORM\Column(length: 255)]
+ 
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    
     private ?string $lastName = null;
 
      /** @throws \Exception */

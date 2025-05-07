@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+ 
 
 #[Route('/api', name: 'app_api_')]
 class SecurityController extends AbstractController
@@ -26,9 +27,8 @@ class SecurityController extends AbstractController
     }
 
 
-#[Route('/registration', name: 'registration', methods: ['POST'])]
-/**
- * @OA\Post(
+#[Route('/registration', name: 'registration', methods: 'POST')]
+/** @OA\Post(
  *     path="/api/registration",
  *     summary="Inscription d'un nouvel utilisateur",
  *     @OA\RequestBody(
@@ -38,6 +38,7 @@ class SecurityController extends AbstractController
  *             type="object",
  *             @OA\Property(property="firstName", type="string", example="Thomas"),
  *             @OA\Property(property="lastName", type="string", example="Dupont"),
+ *             @OA\Property(property="pseudo", type="string", example="Dudu"),
  *             @OA\Property(property="email", type="string", example="thomas@email.com"),
  *             @OA\Property(property="password", type="string", example="Mot de passe")
  *         )
@@ -48,12 +49,13 @@ class SecurityController extends AbstractController
  *         @OA\JsonContent(
  *             type="object",
  *             @OA\Property(property="user", type="string", example="Nom d'utilisateur"),
- *             @OA\Property(property="apiToken", type="string", example="token123"),
+ *             @OA\Property(property="apiToken", type="string", example="31a023e212f116124a36af14ea0c1c3806eb9378"),
  *             @OA\Property(property="roles", type="array", @OA\Items(type="string", example="ROLE_USER"))
  *         )
  *     )
  * )
- */
+ */ 
+ 
 public function register(Request $request): JsonResponse
 {
     $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
@@ -120,4 +122,6 @@ public function register(Request $request): JsonResponse
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+    
 }

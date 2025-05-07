@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
+ 
 
 
 #[ORM\Entity(repositoryClass: RideRepository::class)]
@@ -17,15 +17,15 @@ class Ride
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['ride:read'])]
+    #[Groups(['ride:read', 'ride:write'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write'])] 
     private ?\DateTimeImmutable $date_depart = null;
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write'])] 
     private ?\DateTimeImmutable $heure_depart = null;
 
     #[ORM\Column(length: 255)]
@@ -35,27 +35,27 @@ class Ride
    
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write'])] 
     private ?\DateTimeImmutable $heure_arrivee = null;
-
+    #[Groups(['ride:read', 'ride:write'])]
     #[ORM\Column(length: 255)]
-    #[Groups(['ride:read', 'ride:write'])]
+    
     private ?string $lieu_arrivee = null;
-
+    #[Groups(['ride:read', 'ride:write'])]
     #[ORM\Column(nullable: true)]
-    #[Groups(['ride:read', 'ride:write'])]
+  
     private ?int $note_conducteur = null;
-
-    #[ORM\Column]
     #[Groups(['ride:read', 'ride:write'])]
+    #[ORM\Column]
+     
     private ?int $nb_place = null;
-
-    #[ORM\Column]
     #[Groups(['ride:read', 'ride:write'])]
+    #[ORM\Column]
+     
     private ?int $prix_personne = null;
-
-    #[ORM\Column]
     #[Groups(['ride:read', 'ride:write'])]
+    #[ORM\Column]
+     
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
@@ -64,8 +64,7 @@ class Ride
 
     #[ORM\ManyToOne(inversedBy: 'rides')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['ride:read'])]
-    #[MaxDepth(1)]
+    
     private ?User $conducteur = null;
 
     /**
@@ -73,6 +72,10 @@ class Ride
      */
     #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'covoiturage')]
     private Collection $participes;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['ride:read', 'ride:write'])]
+    private ?string $energie = null;
 
     public function __construct()
     {
@@ -244,6 +247,18 @@ class Ride
                 $participe->setCovoiturage(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEnergie(): ?string
+    {
+        return $this->energie;
+    }
+
+    public function setEnergie(string $energie): static
+    {
+        $this->energie = $energie;
 
         return $this;
     }
