@@ -32,9 +32,7 @@ class Ride
     #[Groups(['ride:read', 'ride:write'])]
     private ?string $lieu_depart = null;
 
-    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])]
-    private ?\DateTimeImmutable $date_arrivee = null;
+   
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
     #[Groups(['ride:read', 'ride:write'])]
@@ -122,17 +120,7 @@ class Ride
         return $this;
     }
 
-    public function getDateArrivee(): ?\DateTimeImmutable
-    {
-        return $this->date_arrivee;
-    }
-
-    public function setDateArrivee(\DateTimeImmutable $date_arrivee): static
-    {
-        $this->date_arrivee = $date_arrivee;
-
-        return $this;
-    }
+   
 
     public function getHeureArrivee(): ?\DateTimeImmutable
     {

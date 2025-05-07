@@ -99,7 +99,7 @@ final class RideController extends AbstractController
  
 
     
-    #[Route('/{id}', name: 'show', methods: 'GET')]
+    #[Route('/{id<\d+>}', name: 'show', methods: 'GET')]
     public function show(int $id): JsonResponse
     {
         $ride = $this->repository->findOneBy(['id' => $id]);
@@ -119,7 +119,7 @@ final class RideController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/{id}', name: 'edit', methods: 'PUT')]
+    #[Route('/{id<\d+>}', name: 'edit', methods: 'PUT')]
     public function edit(int $id, Request $request): JsonResponse
     {
         $ride = $this->repository->find($id);
@@ -144,7 +144,7 @@ final class RideController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
      
-    #[Route('/{id}', name: 'delete', methods: 'DELETE')]
+    #[Route('/{id<\d+>}', name: 'delete', methods: 'DELETE')]
     public function delete(int $id): JsonResponse
     {
         $ride = $this->repository->findOneBy(['id' => $id]);
@@ -157,4 +157,39 @@ final class RideController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
+
+    #[Route('/mes-trajets', name: 'mes_trajets', methods: ['GET'])]
+    public function mesTrajets(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $rides = $this->repository->findBy(['conducteur' => $user]);
+
+        $json = $this->serializer->serialize(
+            $rides,
+            'json',
+            ['groups' => ['ride:read'], 'enable_max_depth' => true]
+        );
+
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
+    }
+    #[Route('/public/rides', name: 'public_rides', methods: ['GET'])]
+    public function getPublicRides(
+        Request $request,
+        RideRepository $rideRepository,
+        SerializerInterface $serializer
+    ): JsonResponse {
+        $depart = $request->query->get('depart');
+        $arrivee = $request->query->get('arrivee');
+        $date = $request->query->get('date');
+    
+        $rides = $rideRepository->findByCriteria($depart, $arrivee, $date);
+    
+        $json = $serializer->serialize($rides, 'json', ['groups' => 'ride:read']);
+        return new JsonResponse($json, 200, [], true); // le `true` ici permet d'envoyer du JSON déjà sérialisé
+    }
+
 }

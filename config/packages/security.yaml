@@ -31,10 +31,12 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/api/ride/public/rides, roles: PUBLIC_ACCESS }
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/doc, roles: PUBLIC_ACCESS }
-    - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+    - { path: ^/api/car/mes-vehicules, roles: ROLE_USER }
+    - { path: ^/api/car, roles: ROLE_USER }
     - { path: ^/api, roles: ROLE_USER }
 when@test:
   security:
