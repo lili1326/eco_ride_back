@@ -17,7 +17,7 @@ class Preference
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT )]
-    #[Groups(['preference:read', 'preference:write'])]
+    #[Groups(['preference:read', 'preference:write','ride:read'])]
     private ?string $description = null;
 
     #[ORM\Column]

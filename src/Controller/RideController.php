@@ -6,7 +6,7 @@ namespace App\Controller;
 use App\Entity\Ride;
 use App\Repository\RideRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use DateTimeImmutable; 
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
@@ -25,37 +25,44 @@ final class RideController extends AbstractController
         private RideRepository $repository,
         private SerializerInterface $serializer,
         private UrlGeneratorInterface $urlGenerator,
+         
     ) {
     }
-
+ 
+    #[OA\Post(
+        path: '/api/ride',
+        summary: "Créer un trajet",
+        security: [['X-AUTH-TOKEN' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: 'object',
+                properties: [
+                    new OA\Property(property: 'lieu_depart', type: 'string', example: 'Lyon'),
+                    new OA\Property(property: 'lieu_arrivee', type: 'string', example: 'Paris'),
+                    new OA\Property(property: 'date_depart', type: 'string', format: 'date', example: '2025-06-01'),
+                    new OA\Property(property: 'heure_depart', type: 'string', format: 'time', example: '08:00:00'),
+                    new OA\Property(property: 'heure_arrivee', type: 'string', format: 'time', example: '10:00:00'),
+                    new OA\Property(property: 'nb_place', type: 'integer', example: 3),
+                    new OA\Property(property: 'prix_personne', type: 'integer', example: 20),
+                    new OA\Property(property: 'energie', type: 'string', example: 'Essence'),
+                    new OA\Property(property: 'voiture', type: 'string', example: '/api/car/1')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Trajet créé',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 401, description: 'Non authentifié'),
+            new OA\Response(response: 400, description: 'Données invalides')
+        ]
+    )]
+       
     #[Route('',name: 'create', methods: 'POST')]
-/**
- * @OA\Post(
- *     path="/api/ride",
- *     summary="Créer un trajet",
- *     tags={"Ride"},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="lieu_depart", type="string", example="Lyon"),
- *             @OA\Property(property="lieu_arrivee", type="string", example="Paris"),
- *             @OA\Property(property="date_depart", type="string", format="date", example="2025-06-01"),
- *             @OA\Property(property="heure_depart", type="string", format="time", example="08:00:00"),
- *             @OA\Property(property="date_arrivee", type="string", format="date", example="2025-06-01"),
- *             @OA\Property(property="heure_arrivee", type="string", format="time", example="11:00:00"),
- *             @OA\Property(property="nb_place", type="integer", example=3),
- *             @OA\Property(property="prix_personne", type="integer", example=20)
- *             @OA\Property(property="pseudo", type="string", example="dudu")
- *         )
- *     ),
- *     @OA\Response(
- *         response=201,
- *         description="Trajet créé",
- *         @OA\JsonContent(type="object")
- *     )
- * )
-*/
+
     public function new(Request $request): JsonResponse
     {              
             // 1. Récupération de l'utilisateur connecté
@@ -103,6 +110,19 @@ final class RideController extends AbstractController
 
     
     #[Route('/{id<\d+>}', name: 'show', methods: 'GET')]
+
+    #[OA\Get(
+        path: '/api/ride/{id}',
+        summary: 'Afficher un trajet par ID',
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Trajet trouvé'),
+            new OA\Response(response: 404, description: 'Trajet introuvable')
+        ]
+    )]
+
     public function show(int $id): JsonResponse
     {
         $ride = $this->repository->findOneBy(['id' => $id]);
@@ -123,6 +143,23 @@ final class RideController extends AbstractController
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
     #[Route('/{id<\d+>}', name: 'edit', methods: 'PUT')]
+
+    #[OA\Put(
+        path: '/api/ride/{id}',
+        summary: 'Modifier un trajet',
+        security: [['X-AUTH-TOKEN' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(type: 'object')
+        ),
+        responses: [
+            new OA\Response(response: 204, description: 'Trajet modifié'),
+            new OA\Response(response: 404, description: 'Trajet introuvable')
+        ]
+    )]
 
     public function edit(int $id, Request $request): JsonResponse
     {
@@ -149,6 +186,20 @@ final class RideController extends AbstractController
     }
      
     #[Route('/{id<\d+>}', name: 'delete', methods: 'DELETE')]
+
+    #[OA\Delete(
+        path: '/api/ride/{id}',
+        summary: 'Supprimer un trajet',
+        security: [['X-AUTH-TOKEN' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 204, description: 'Trajet supprimé'),
+            new OA\Response(response: 404, description: 'Trajet introuvable')
+        ]
+    )]
+
     public function delete(int $id): JsonResponse
     {
         $ride = $this->repository->findOneBy(['id' => $id]);
@@ -163,6 +214,21 @@ final class RideController extends AbstractController
     }
 
     #[Route('/mes-trajets', name: 'mes_trajets', methods: ['GET'])]
+
+    #[OA\Get(
+        path: '/api/ride/mes-trajets',
+        summary: 'Récupère les trajets créés par l’utilisateur connecté',
+        security: [['X-AUTH-TOKEN' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des trajets de l’utilisateur',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+            ),
+            new OA\Response(response: 401, description: 'Utilisateur non authentifié')
+        ]
+    )]
+
     public function mesTrajets(): JsonResponse
     {
         $user = $this->getUser();
@@ -184,6 +250,24 @@ final class RideController extends AbstractController
     }
 
     #[Route('/public/rides', name: 'public_rides', methods: ['GET'])]
+
+    #[OA\Get(
+        path: '/api/ride/public/rides',
+        summary: 'Rechercher des trajets publics',
+        parameters: [
+            new OA\Parameter(name: 'depart', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'arrivee', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'date', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des trajets correspondant aux critères',
+                content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+            )
+        ]
+    )]
+
     public function getPublicRides(
         Request $request,
         RideRepository $rideRepository,
