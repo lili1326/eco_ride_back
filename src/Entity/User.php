@@ -65,6 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Preference>
      */
     #[ORM\OneToMany(targetEntity: Preference::class, mappedBy: 'utilisateur')]
+    #[Groups(['ride:read'])]
     private Collection $preferences;
 
     /**

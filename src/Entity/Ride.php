@@ -66,7 +66,9 @@ class Ride
     #[ORM\JoinColumn(nullable: false)]   
     private ?User $conducteur = null;
 
-   
+    #[Groups(['ride:read','ride:write'])]
+    #[ORM\ManyToOne(targetEntity: Car::class)]
+    private ?Car $voiture = null;
     /**
      * @var Collection<int, Participe>
      */
@@ -76,10 +78,9 @@ class Ride
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Review::class)]
 private Collection $reviews;
 
-    #[ORM\Column(length: 255)]
-    private ?string $energie = null;
-
     
+
+ 
 
     public function __construct()
     {
@@ -256,17 +257,17 @@ private Collection $reviews;
         return $this;
     }
 
-    public function getEnergie(): ?string
+   
+
+    public function getVoiture(): ?Car
     {
-        return $this->energie;
+        return $this->voiture;
     }
-
-    public function setEnergie(string $energie): static
+    
+    public function setVoiture(?Car $voiture): static
     {
-        $this->energie = $energie;
-
+        $this->voiture = $voiture;
+    
         return $this;
     }
-
-   
 }

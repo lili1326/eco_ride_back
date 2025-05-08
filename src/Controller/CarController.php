@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Car;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
- 
+use OpenApi\Attributes as OA;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CarRepository;
@@ -24,6 +24,36 @@ final class CarController extends AbstractController
         private UrlGeneratorInterface $urlGenerator,
     ) {
     }
+
+    #[OA\Post(
+        path: '/api/car',
+        summary: 'Ajouter un véhicule',
+        security: [['X-AUTH-TOKEN' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: 'object',
+                properties: [
+                    new OA\Property(property: 'marque', type: 'string', example: 'Peugeot'),
+                    new OA\Property(property: 'modele', type: 'string', example: '208'),
+                    new OA\Property(property: 'immatriculation', type: 'string', example: 'AB-123-CD'),
+                    new OA\Property(property: 'couleur', type: 'string', example: 'Bleu'),
+                    new OA\Property(property: 'energie', type: 'string', example: 'Essence'),
+                    new OA\Property(property: 'nb_places', type: 'integer', example: 5),
+                    new OA\Property(property: 'date_premiere_immatriculation', type: 'string', format: 'date', example: '2020-01-01')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Véhicule créé avec succès',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(response: 401, description: 'Utilisateur non authentifié')
+        ]
+    )]
+
     #[Route(methods: 'POST')]
     public function new(Request $request): JsonResponse
     {              
@@ -70,6 +100,21 @@ final class CarController extends AbstractController
 }
     
 #[Route('/mes-vehicules', name: 'mes_vehicules', methods: ['GET'])]
+
+#[OA\Get(
+    path: '/api/car/mes-vehicules',
+    summary: 'Liste des véhicules de l’utilisateur connecté',
+    security: [['X-AUTH-TOKEN' => []]],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Liste des véhicules',
+            content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'object'))
+        ),
+        new OA\Response(response: 401, description: 'Utilisateur non authentifié')
+    ]
+)]
+
 public function mesVehicules(): JsonResponse
 {
     $user = $this->getUser();
@@ -90,6 +135,19 @@ public function mesVehicules(): JsonResponse
 
 
     #[Route('/{id}', name: 'show', methods: 'GET')]
+
+    #[OA\Get(
+        path: '/api/car/{id}',
+        summary: 'Afficher un véhicule par ID',
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Véhicule trouvé', content: new OA\JsonContent(type: 'object')),
+            new OA\Response(response: 404, description: 'Véhicule non trouvé')
+        ]
+    )]
+
     public function show(int $id): JsonResponse
     {
         $car = $this->repository->findOneBy(['id' => $id]);
@@ -110,6 +168,35 @@ public function mesVehicules(): JsonResponse
     }
     
     #[Route('/{id}', name: 'edit', methods: 'PUT')]
+
+    #[OA\Put(
+        path: '/api/car/{id}',
+        summary: 'Modifier un véhicule',
+        security: [['X-AUTH-TOKEN' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: 'object',
+                properties: [
+                    new OA\Property(property: 'marque', type: 'string', example: 'Renault'),
+                    new OA\Property(property: 'modele', type: 'string', example: 'Clio'),
+                    new OA\Property(property: 'immatriculation', type: 'string', example: 'XY-456-ZZ'),
+                    new OA\Property(property: 'couleur', type: 'string', example: 'Rouge'),
+                    new OA\Property(property: 'energie', type: 'string', example: 'Diesel'),
+                    new OA\Property(property: 'nb_places', type: 'integer', example: 4),
+                    new OA\Property(property: 'date_premiere_immatriculation', type: 'string', format: 'date', example: '2018-05-15')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 204, description: 'Véhicule mis à jour'),
+            new OA\Response(response: 404, description: 'Véhicule non trouvé')
+        ]
+    )]
+
     public function edit(int $id, Request $request): JsonResponse
     {
         $car = $this->repository->find($id);
@@ -134,9 +221,22 @@ public function mesVehicules(): JsonResponse
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-
          
         #[Route('/{id}', name: 'delete', methods: 'DELETE')]
+
+        #[OA\Delete(
+            path: '/api/car/{id}',
+            summary: 'Supprimer un véhicule',
+            security: [['X-AUTH-TOKEN' => []]],
+            parameters: [
+                new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
+            ],
+            responses: [
+                new OA\Response(response: 204, description: 'Véhicule supprimé'),
+                new OA\Response(response: 404, description: 'Véhicule non trouvé')
+            ]
+        )]
+
     public function delete(int $id): JsonResponse
     {
         $car = $this->repository->findOneBy(['id' => $id]);

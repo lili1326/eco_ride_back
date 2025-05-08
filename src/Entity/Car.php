@@ -19,11 +19,11 @@ class Car
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write','ride:read'])]
     private ?string $marque = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write','ride:read'])]
     private ?string $modele = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
@@ -39,7 +39,7 @@ class Car
     private ?string $couleur = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write','ride:read'])]
     private ?string $energie = null;
 
     #[ORM\ManyToOne(inversedBy: 'cars')]
