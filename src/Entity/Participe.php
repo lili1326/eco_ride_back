@@ -10,12 +10,12 @@ use Doctrine\ORM\Mapping as ORM;
 class Participe
 {
     #[ORM\Id]
-    #[ORM\ManyToOne(inversedBy: 'participations')]
+    #[ORM\ManyToOne(inversedBy: 'participes')]  // correspond à User::$participes
     #[ORM\JoinColumn(nullable: false)]
     private ?User $utilisateur = null;
 
     #[ORM\Id]
-    #[ORM\ManyToOne(inversedBy: 'passagers')]
+    #[ORM\ManyToOne(inversedBy: 'participes')]  // correspond à Ride::$participes
     #[ORM\JoinColumn(nullable: false)]
     private ?Ride $covoiturage = null;
 

@@ -63,23 +63,28 @@ class Ride
     private ?\DateTimeImmutable $updateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'rides')]
-    #[ORM\JoinColumn(nullable: false)]
-    
+    #[ORM\JoinColumn(nullable: false)]   
     private ?User $conducteur = null;
 
+   
     /**
      * @var Collection<int, Participe>
      */
     #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'covoiturage')]
     private Collection $participes;
 
+    #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Review::class)]
+private Collection $reviews;
+
     #[ORM\Column(length: 255)]
-    #[Groups(['ride:read', 'ride:write'])]
     private ?string $energie = null;
+
+    
 
     public function __construct()
     {
         $this->participes = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -262,4 +267,6 @@ class Ride
 
         return $this;
     }
+
+   
 }

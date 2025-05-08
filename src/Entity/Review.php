@@ -28,17 +28,17 @@ class Review
     #[Groups(['review:read', 'review:write'])]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[Groups(['review:read', 'review:write'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $auteur = null;
+    #[ORM\ManyToOne(inversedBy: 'avisRecus')]
+private ?User $conducteur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reviews')]
-    private ?User $conducteur = null;
+#[ORM\ManyToOne(inversedBy: 'reviews')]
+private ?User $auteur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Ride $covoiturage = null;
+#[ORM\ManyToOne(inversedBy: 'reviews')]
+#[ORM\JoinColumn(nullable: false)]
+private ?Ride $covoiturage = null;
+
+   
 
     public function getId(): ?int
     {

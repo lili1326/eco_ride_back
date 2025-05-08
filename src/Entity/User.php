@@ -73,11 +73,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'auteur', orphanRemoval: true)]
     private Collection $reviews;
 
+    #[ORM\OneToMany(mappedBy: 'conducteur', targetEntity: Review::class)]
+    private Collection $avisRecus;
+
     /**
      * @var Collection<int, Participe>
      */
     #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'utilisateur')]
     private Collection $participes;
+
+  
 
     #[ORM\Column(length: 255)]
  
@@ -96,6 +101,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
          $this->preferences = new ArrayCollection();
          $this->reviews = new ArrayCollection();
          $this->participes = new ArrayCollection();
+         $this->avisRecus = new ArrayCollection();
      }
 
     public function getId(): ?int
