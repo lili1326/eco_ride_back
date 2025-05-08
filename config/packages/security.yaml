@@ -40,6 +40,8 @@ security:
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+    - { path: ^/api/review, roles: ROLE_USER }
+    - { path: ^/api/review/mes-avis, roles: ROLE_USER }
     - { path: ^/api/preference, roles: ROLE_USER }
     - { path: ^/api/car/mes-vehicules, roles: ROLE_USER }
     - { path: ^/api/car, roles: ROLE_USER }
