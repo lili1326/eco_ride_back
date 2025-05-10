@@ -32,15 +32,15 @@ class Preference
     private ?User $utilisateur = null;
 
     #[ORM\Column(length: 255 )]
-    #[Groups(['preference:read', 'preference:write'])]
+    #[Groups(['preference:read', 'preference:write','ride:read'])]
     private ?string $musique = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['preference:read', 'preference:write'])]
+    #[Groups(['preference:read', 'preference:write','ride:read'])]
     private ?string $fumeur = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['preference:read', 'preference:write'])]
+    #[Groups(['preference:read', 'preference:write','ride:read'])]
     private ?string $animaux = null;
 
     public function getId(): ?int

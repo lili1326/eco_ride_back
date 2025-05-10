@@ -21,13 +21,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    
+    #[Groups(['user:read'])]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private array $roles = [];
 
     /**
@@ -37,9 +38,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    
+    #[Groups(['user:read', 'ride:read'])]
     private ?string $pseudo = null;
-
+    
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -86,11 +87,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
   
 
     #[ORM\Column(length: 255)]
- 
+ #[Groups(['user:read', 'ride:read'])]
     private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
     
+    #[ORM\Column(length: 255)]
+    #[Groups(['user:read'])] 
     private ?string $lastName = null;
 
      /** @throws \Exception */

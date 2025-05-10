@@ -64,6 +64,7 @@ class Ride
 
     #[ORM\ManyToOne(inversedBy: 'rides')]
     #[ORM\JoinColumn(nullable: false)]   
+    #[Groups(['ride:read'])]
     private ?User $conducteur = null;
 
     #[Groups(['ride:read','ride:write'])]
