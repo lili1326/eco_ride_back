@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\Ride;
 use App\Repository\RideRepository;
+use App\Repository\CarRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface; 
-
+ 
 
 
  #[Route('/api/ride', name: 'app_api_ride_')]
@@ -63,13 +64,18 @@ final class RideController extends AbstractController
        
     #[Route('',name: 'create', methods: 'POST')]
 
-    public function new(Request $request): JsonResponse
+    public function new(Request $request, CarRepository $carRepo): JsonResponse
     {              
             // 1. Récupération de l'utilisateur connecté
     $conducteur = $this->getUser();
     if (!$conducteur) {
         return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
     }
+
+    $data = json_decode($request->getContent(), true);
+    $carIri = $data['voiture'] ?? null;
+    unset($data['voiture']);
+
 
     // 2. Désérialisation avec le groupe 'ride:write'
     $ride = $this->serializer->deserialize(
@@ -80,6 +86,18 @@ final class RideController extends AbstractController
         'enable_max_depth' => true,]
         
     );
+//  Associer la voiture
+if ($carIri) {
+    $carId = basename($carIri); // "/api/car/4" → "4"
+    $car = $carRepo->findOneBy(['id' => $carId, 'owner' => $conducteur]);
+
+    if (!$car) {
+        return new JsonResponse(['error' => 'Voiture introuvable'], 404);
+    }
+
+    $ride->setVoiture($car);
+}
+
 
     // 3. Hydratation des champs dynamiques
     $ride->setCreatedAt(new \DateTimeImmutable());
@@ -284,4 +302,6 @@ final class RideController extends AbstractController
     }
 
 
+
+    
 }
