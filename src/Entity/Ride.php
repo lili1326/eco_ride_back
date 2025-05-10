@@ -68,6 +68,7 @@ class Ride
 
     #[Groups(['ride:read','ride:write'])]
     #[ORM\ManyToOne(targetEntity: Car::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Car $voiture = null;
     /**
      * @var Collection<int, Participe>
