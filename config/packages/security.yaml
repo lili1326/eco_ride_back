@@ -9,16 +9,35 @@ security:
       entity:
         class: App\Entity\User
         property: email
+    admin_provider:
+      entity:
+        class: App\Entity\Admin
+        property: email
+    # used to reload user from session & other features (e.g. switch_user)
   firewalls:
+    admin:
+      pattern: ^/admin
+      lazy: true
+      provider: admin_provider
+      custom_authenticator: App\Security\AdminAuthenticator
+      entry_point: App\Security\AdminAuthenticator
+      logout:
+        path: admin_logout
+        target: /
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
     main:
       lazy: true
       provider: app_user_provider
-      custom_authenticator: App\Security\ApiTokenAuthenticator
+      custom_authenticator:
+        - App\Security\ApiTokenAuthenticator
       json_login:
         check_path: app_api_login
+      logout:
+        path: app_logout
+        # where to redirect after logout
+        # target: app_any_route
     api:
       pattern: ^/api
       stateless: true
@@ -36,6 +55,9 @@ security:
   access_control:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_ADMIN }
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/ride/public/rides, roles: PUBLIC_ACCESS }
     - { path: ^/api/registration, roles: PUBLIC_ACCESS }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
@@ -47,7 +69,7 @@ security:
     - { path: ^/api/car, roles: ROLE_USER }
     - { path: ^/api, roles: ROLE_USER }
     - { path: ^/api/ride, roles: ROLE_USER }
-
+    - { path: ^/api, roles: ROLE_USER }
 when@test:
   security:
     password_hashers:
