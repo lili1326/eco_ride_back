@@ -15,15 +15,11 @@ security:
         property: email
     # used to reload user from session & other features (e.g. switch_user)
   firewalls:
-    admin:
-      pattern: ^/admin
-      lazy: true
+    api_admin:
+      pattern: ^/api/admin
+      stateless: true
       provider: admin_provider
-      custom_authenticator: App\Security\AdminAuthenticator
-      entry_point: App\Security\AdminAuthenticator
-      logout:
-        path: admin_logout
-        target: /
+      custom_authenticator: App\Security\ApiAdminAuthenticator
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
@@ -56,6 +52,7 @@ security:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api/admin/login, roles: PUBLIC_ACCESS }
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
     - { path: ^/api/ride/public/rides, roles: PUBLIC_ACCESS }

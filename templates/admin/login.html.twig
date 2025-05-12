@@ -10,16 +10,12 @@
 			</div>
 		{% endif %}
 
-		<form method="post" action="{{ path('admin_login') }}" data-turbo="false">
-			<div class="mb-3">
-				<label>Email</label>
-				<input type="email" name="_email" value="{{ last_username }}" required class="form-control">
-			</div>
-			<div class="mb-3">
-				<label>Mot de passe</label>
-				<input type="password" name="_password" required class="form-control">
-			</div>
-			<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-			<button class="btn btn-primary">Connexion</button>
+		<form method="post" action="{{ path('admin_login') }}">
+			<input type="email" name="_username" value="{{ last_username }}" required>
+			<input type="password" name="_password" required>
+			{% if error %}
+				<div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+			{% endif %}
+			<button type="submit">Se connecter</button>
 		</form>
 	{% endblock %}
