@@ -1,0 +1,16 @@
+ {
+  "intelephense.environment.includePaths": [
+    "vendor/mongodb/mongodb/src",
+    "vendor/mongodb/mongodb"
+  ],
+  "intelephense.stubs": [
+    "php",
+    "standard",
+    "Core",
+    "date",
+    "json",
+    "spl",
+    "pcre",
+    "Reflection"
+  ]
+}
