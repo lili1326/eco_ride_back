@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use MongoDB\Client as MongoClient;
+use MongoDB\BSON\UTCDateTime;
+ 
  
 
 #[Route('/api', name: 'app_api_')]
@@ -69,6 +72,20 @@ public function register(Request $request): JsonResponse
 
     $this->manager->persist($user);
     $this->manager->flush();
+
+    // Création du wallet en MongoDB
+    $mongo = new MongoClient('mongodb://localhost:27017');  
+    $walletCollection = $mongo->selectCollection('covoiturage', 'wallet');
+
+    $walletCollection->insertOne([
+        'userId' => $user->getId(),
+        'solde' => 20,
+        'transactions' => [[
+            'type' => 'bonus_inscription',
+            'montant' => 20,
+            'date' => new UTCDateTime()
+        ]]
+    ]);
 
     return new JsonResponse(
         [
@@ -205,5 +222,25 @@ public function register(Request $request): JsonResponse
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    
+  #[Route('/wallet', name: 'wallet_show', methods: ['GET'])]
+public function showWallet(): JsonResponse
+{
+    $user = $this->getUser();
+    if (!$user) {
+        return new JsonResponse(['error' => 'Non authentifié'], 401);
+    }
+
+    $mongo = new MongoClient('mongodb://localhost:27017'); // adapte si nécessaire
+    $walletCollection = $mongo->selectCollection('covoiturage', 'wallet');
+
+    $wallet = $walletCollection->findOne(['userId' => $user->getId()]);
+    if (!$wallet) {
+        return new JsonResponse(['error' => 'Portefeuille introuvable'], 404);
+    }
+
+    return new JsonResponse([
+        'solde' => $wallet['solde'],
+        'transactions' => $wallet['transactions'],
+    ]);
+}  
 }
