@@ -80,9 +80,9 @@ class Ride
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Review::class)]
 private Collection $reviews;
 
-    
-
- 
+   #[ORM\Column(length: 255)]
+     #[Groups(['ride:read','ride:write'])]
+private ?string $statut = 'en_attente';
 
     public function __construct()
     {
@@ -272,4 +272,15 @@ private Collection $reviews;
     
         return $this;
     }
+public function getStatut(): ?string
+{
+    return $this->statut;
+}
+
+public function setStatut(string $statut): self
+{
+    $this->statut = $statut;
+    return $this;
+}
+     
 }

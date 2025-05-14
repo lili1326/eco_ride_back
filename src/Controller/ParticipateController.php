@@ -101,7 +101,7 @@ public function participer(
     $participation = new Participe();
     $participation->setUtilisateur($user);
     $participation->setCovoiturage($ride);
-    $participation->setStatut("en_attente"); // ou "réservé"
+    $participation->setStatut("réservé");  
 
     $em->persist($participation);
     $em->flush();

@@ -15,6 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface; 
+use MongoDB\Client as MongoClient;
+use Psr\Log\LoggerInterface;
  
 
 
@@ -301,7 +303,85 @@ if ($carIri) {
         return new JsonResponse($json, 200, [], true); // le `true` ici permet d'envoyer du JSON déjà sérialisé
     }
 
+  #[Route('/{id<\d+>}/statut', name: 'update_statut', methods: ['PUT'])]
+public function updateStatut(int $id, Request $request): JsonResponse
+{
+    $user = $this->getUser();
+    if (!$user) {
+        return new JsonResponse(['error' => 'Non connecté'], 401);
+    }
 
+    $data = json_decode($request->getContent(), true);
+    $newStatut = $data['statut'] ?? null;
 
+    if (!in_array($newStatut, ['en_cours', 'termine'])) {
+        return new JsonResponse(['error' => 'Statut invalide'], 400);
+    }
+
+    $ride = $this->repository->find($id);
+    if (!$ride || $ride->getConducteur() !== $user) {
+        return new JsonResponse(['error' => 'Trajet non autorisé ou introuvable'], 403);
+    }
+
+    $ride->setStatut($newStatut);
+    $this->manager->flush();
+
+    // Simule une notification email (éviter file_put_contents)
+    foreach ($ride->getParticipes() as $p) {
+        $passager = $p->getUtilisateur();
+        $email = $passager->getEmail();
+        $prenom = $passager->getFirstName();
+        $message = sprintf("Bonjour %s, le trajet est maintenant %s. Merci de laisser un avis.", $prenom, $newStatut);
+        // Simule via log ou ignore
+        error_log("Notification à $email : $message");
+    }
+
+    if ($newStatut === 'termine') {
+        $mongo = new MongoClient("mongodb://localhost:27017");
+        $wallets = $mongo->selectCollection("covoiturage", "wallet");
+        $tresorerie = $mongo->selectCollection("covoiturage", "tresorerie");
+
+        $prix = $ride->getPrixPersonne();
+        $conducteurId = $ride->getConducteur()->getId();
+
+        foreach ($ride->getParticipes() as $p) {
+            $passagerId = $p->getUtilisateur()->getId();
+
+            $wallets->updateOne(
+                ['userId' => $passagerId],
+                [
+                    '$inc' => ['solde' => -$prix],
+                    '$push' => ['transactions' => [
+                        'type' => 'paiement_trajet',
+                        'montant' => -$prix,
+                        'trajetId' => $ride->getId(),
+                        'date' => new UTCDateTime()
+                    ]]
+                ]
+            );
+
+            $wallets->updateOne(
+                ['userId' => $conducteurId],
+                [
+                    '$inc' => ['solde' => $prix - 2],
+                    '$push' => ['transactions' => [
+                        'type' => 'recompense_trajet',
+                        'montant' => $prix - 2,
+                        'trajetId' => $ride->getId(),
+                        'date' => new UTCDateTime()
+                    ]]
+                ]
+            );
+
+            $tresorerie->insertOne([
+                'trajetId' => $ride->getId(),
+                'montant' => 2,
+                'date' => new UTCDateTime()
+            ]);
+        }
+    }
+
+    return new JsonResponse(['message' => "Statut mis à jour à \"$newStatut\""]);
+}
     
 }
