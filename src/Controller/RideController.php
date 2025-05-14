@@ -324,6 +324,12 @@ public function updateStatut(int $id, Request $request): JsonResponse
     }
 
     $ride->setStatut($newStatut);
+
+//  Ajoute ce bloc pour mettre à jour le statut de chaque passager
+foreach ($ride->getParticipes() as $p) {
+    $p->setStatut($newStatut); // ← c'est ça qui manquait
+}
+
     $this->manager->flush();
 
     // Simule une notification email (éviter file_put_contents)
@@ -346,6 +352,16 @@ public function updateStatut(int $id, Request $request): JsonResponse
 
         foreach ($ride->getParticipes() as $p) {
             $passagerId = $p->getUtilisateur()->getId();
+
+            //  Mettre à jour le statut du passager aussi
+    $p->setStatut($newStatut);
+
+    // Email fictif (déjà présent)
+    $message = sprintf(
+        "Bonjour %s, le trajet auquel vous avez participé est %s.",
+        $passager->getFirstName(),
+        $newStatut === 'termine' ? "terminé" : "en cours"
+    );
 
             $wallets->updateOne(
                 ['userId' => $passagerId],
@@ -378,8 +394,10 @@ public function updateStatut(int $id, Request $request): JsonResponse
                 'montant' => 2,
                 'date' => new UTCDateTime()
             ]);
+
         }
     }
+     $this->manager->flush();
 
     return new JsonResponse(['message' => "Statut mis à jour à \"$newStatut\""]);
 }

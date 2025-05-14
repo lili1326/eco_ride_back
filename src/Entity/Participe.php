@@ -20,7 +20,7 @@ class Participe
     private ?Ride $covoiturage = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $statut = null;
+    private ?string $statut = "à_venir";
 
     public function getUtilisateur(): ?User
     {
