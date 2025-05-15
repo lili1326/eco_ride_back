@@ -9,34 +9,52 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Participe;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request};
+use Symfony\Component\Serializer\SerializerInterface;
+
+
 
 class PassagerController extends AbstractController
 {
-    
-#[Route('/api/passager/trajets', name: 'api_passager_trajets', methods: ['GET'])]
+ #[Route('/api/passager/trajets', name: 'api_passager_trajets', methods: ['GET'])]
 public function getTrajets(EntityManagerInterface $em): JsonResponse
 {
-    /** @var \App\Entity\User $user */
     $user = $this->getUser();
+    if (!$user) {
+        return new JsonResponse(['error' => 'Non authentifié'], Response::HTTP_UNAUTHORIZED);
+    }
 
-    $participations = $user->getParticipes();
+    $participations = $em->getRepository(Participe::class)->findBy(['utilisateur' => $user]);
+    $reviewRepo = $em->getRepository(\App\Entity\Review::class);
 
     $data = [];
 
     foreach ($participations as $p) {
         $covoit = $p->getCovoiturage();
+
+        $existing = $reviewRepo->findOneBy([
+            'auteur' => $user,
+            'covoiturage' => $covoit,
+        ]);
+
         $data[] = [
-            'ride_id' => $covoit->getId(),
+            'id' => $covoit->getId(),
             'lieu_depart' => $covoit->getLieuDepart(),
             'lieu_arrivee' => $covoit->getLieuArrivee(),
             'date_depart' => $covoit->getDateDepart()->format('Y-m-d'),
             'statut' => $p->getStatut(),
-            'conducteur' => $covoit->getConducteur()?->getPseudo()
+            'conducteur' => [
+                'id' => $covoit->getConducteur()?->getId(),
+                'firstName' => $covoit->getConducteur()?->getFirstName(),
+            ],
+            'avisDejaLaisse' => $existing !== null
         ];
     }
 
-    return new JsonResponse($data);
+    return new JsonResponse($data, Response::HTTP_OK);
 }
+
+
+ 
 
 #[Route('/api/passager/statut', name: 'api_update_statut', methods: ['POST'])]
 public function updateStatut(Request $request, EntityManagerInterface $em): JsonResponse

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Review;
+use App\Entity\User;
+use App\Entity\Ride;
 use App\Repository\ReviewRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,75 +28,78 @@ final class ReviewController extends AbstractController
     ) {
     }
 
-    #[OA\Post(
-        path: '/api/review',
-        summary: 'Poster un avis sur un utilisateur ou un covoiturage',
-        security: [['X-AUTH-TOKEN' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                type: 'object',
-                properties: [
-                    new OA\Property(property: 'note', type: 'integer', example: 4),
-                    new OA\Property(property: 'commentaire', type: 'string', example: 'Très bon conducteur.'),
-                    new OA\Property(property: 'conducteur', type: 'string', example: '/api/users/3')
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(
-                response: 201,
-                description: 'Avis créé avec succès',
-                content: new OA\JsonContent(type: 'object')
-            ),
-            new OA\Response(response: 401, description: 'Non authentifié')
-        ]
-    )]
-
-    #[Route(methods: 'POST')]
-    public function new(Request $request): JsonResponse
-    {              
-            // 1. Récupération de l'utilisateur connecté
+    
+#[Route(methods: 'POST')]
+public function new(Request $request): JsonResponse
+{
     $auteur = $this->getUser();
     if (!$auteur) {
         return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
     }
 
-    // 2. Désérialisation avec le groupe 'review:write'
-    $review = $this->serializer->deserialize(
-        $request->getContent(),
-        Review::class,
-        'json',
-        ['groups' => ['review:write'],
-        'enable_max_depth' => true,]
-        
-    );
+    $data = json_decode($request->getContent(), true);
 
-    // 3. Hydratation des champs dynamiques
-    $review->setCreatedAt(new \DateTimeImmutable());
+    if (!isset($data['note'], $data['commentaire'], $data['conducteur'], $data['covoiturage'])) {
+        return new JsonResponse(['error' => 'Champs requis manquants'], 400);
+    }
+
+    $conducteurId = basename($data['conducteur']);
+    $rideId = basename($data['covoiturage']);
+
+    $conducteur = $this->manager->getRepository(User::class)->find($conducteurId);
+    $ride = $this->manager->getRepository(Ride::class)->find($rideId);
+
+    if (!$conducteur || !$ride) {
+        return new JsonResponse(['error' => 'Conducteur ou trajet introuvable'], 404);
+    }
+
+    if ($ride->getStatut() !== 'termine') {
+        return new JsonResponse(['error' => 'Ce trajet n’est pas encore terminé.'], 403);
+    }
+
+    // Vérifie que l'utilisateur a bien participé à ce trajet
+    $participeRepo = $this->manager->getRepository(\App\Entity\Participe::class);
+    $participation = $participeRepo->findOneBy([
+        'covoiturage' => $ride,
+        'utilisateur' => $auteur,
+        'statut' => 'termine',
+    ]);
+
+    if (!$participation) {
+        return new JsonResponse(['error' => 'Vous n’avez pas participé à ce trajet.'], 403);
+    }
+
+    // Empêche les doublons d'avis
+    $existing = $this->repository->findOneBy([
+        'auteur' => $auteur,
+        'covoiturage' => $ride
+    ]);
+
+    if ($existing) {
+        return new JsonResponse(['error' => 'Vous avez déjà laissé un avis sur ce trajet.'], 409);
+    }
+
+    $review = new Review();
+    $review->setNote((int) $data['note']);
+    $review->setCommentaire($data['commentaire']);
     $review->setAuteur($auteur);
+    $review->setConducteur($conducteur);
+    $review->setCovoiturage($ride);
+    $review->setCreatedAt(new \DateTimeImmutable());
 
-    // 4. Sauvegarde
     $this->manager->persist($review);
     $this->manager->flush();
 
-    // 5. Sérialisation avec le groupe 'review:read'
-    $responseData = $this->serializer->serialize(
+    $json = $this->serializer->serialize(
         $review,
         'json',
-        ['groups' => ['review:read'],
-        'enable_max_depth' => true,]
+        ['groups' => ['review:read']]
     );
 
-    // 6. Réponse
-    $location = $this->urlGenerator->generate(
-        'app_api_review_show',
-        ['id' => $review->getId()],
-        UrlGeneratorInterface::ABSOLUTE_URL
-    );
-
-    return new JsonResponse($responseData, Response::HTTP_CREATED, ['Location' => $location], true);
+    return new JsonResponse($json, JsonResponse::HTTP_CREATED, [], true);
 }
+
+   
     
 #[Route('/mes-avis', name: 'mes_avis', methods: ['GET'])]
 
@@ -234,8 +239,6 @@ public function mesAvis(): JsonResponse
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
-
-    
 
     }
        

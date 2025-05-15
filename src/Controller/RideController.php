@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface; 
 use MongoDB\Client as MongoClient;
 use Psr\Log\LoggerInterface;
- 
+use MongoDB\BSON\UTCDateTime; 
 
 
  #[Route('/api/ride', name: 'app_api_ride_')]
@@ -315,8 +315,8 @@ public function updateStatut(int $id, Request $request): JsonResponse
     $newStatut = $data['statut'] ?? null;
 
     if (!in_array($newStatut, ['en_cours', 'termine'])) {
-        return new JsonResponse(['error' => 'Statut invalide'], 400);
-    }
+    return new JsonResponse(['error' => 'Statut invalide'], 400);
+}
 
     $ride = $this->repository->find($id);
     if (!$ride || $ride->getConducteur() !== $user) {
@@ -337,6 +337,7 @@ foreach ($ride->getParticipes() as $p) {
         $passager = $p->getUtilisateur();
         $email = $passager->getEmail();
         $prenom = $passager->getFirstName();
+        $p->setStatut($newStatut);
         $message = sprintf("Bonjour %s, le trajet est maintenant %s. Merci de laisser un avis.", $prenom, $newStatut);
         // Simule via log ou ignore
         error_log("Notification à $email : $message");

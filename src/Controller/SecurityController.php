@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use MongoDB\Client as MongoClient;
 use MongoDB\BSON\UTCDateTime;
+use App\Repository\UserRepository;
  
  
 
@@ -233,6 +234,7 @@ public function showWallet(): JsonResponse
     $mongo = new MongoClient('mongodb://localhost:27017'); // adapte si nécessaire
     $walletCollection = $mongo->selectCollection('covoiturage', 'wallet');
 
+         /** @var \App\Entity\User|null $user */
     $wallet = $walletCollection->findOne(['userId' => $user->getId()]);
     if (!$wallet) {
         return new JsonResponse(['error' => 'Portefeuille introuvable'], 404);
@@ -243,4 +245,19 @@ public function showWallet(): JsonResponse
         'transactions' => $wallet['transactions'],
     ]);
 }  
+
+#[Route('/users/{id}', name: 'api_user_show', methods: ['GET'])]
+public function show(int $id, UserRepository $repo, SerializerInterface $serializer): JsonResponse
+{
+    $user = $repo->find($id);
+
+    if (!$user) {
+        return new JsonResponse(['error' => 'Utilisateur introuvable'], 404);
+    }
+
+    $json = $serializer->serialize($user, 'json', ['groups' => ['user:read']]);
+
+    return new JsonResponse($json, 200, [], true);
+}
+
 }

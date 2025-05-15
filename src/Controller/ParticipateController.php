@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\{Request, JsonResponse};
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\RideRepository;
 use MongoDB\Client as MongoClient;
+use MongoDB\BSON\UTCDateTime;
 
 final class ParticipateController extends AbstractController
 {

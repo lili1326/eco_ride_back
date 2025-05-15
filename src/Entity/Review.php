@@ -29,13 +29,16 @@ class Review
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'avisRecus')]
+    #[Groups(['review:read'])]
 private ?User $conducteur = null;
 
 #[ORM\ManyToOne(inversedBy: 'reviews')]
+#[Groups(['review:read'])]
 private ?User $auteur = null;
 
 #[ORM\ManyToOne(inversedBy: 'reviews')]
 #[ORM\JoinColumn(nullable: false)]
+ #[Groups(['review:read', 'review:write'])]
 private ?Ride $covoiturage = null;
 
    
@@ -105,12 +108,12 @@ private ?Ride $covoiturage = null;
         return $this;
     }
 
-    public function getCovoiturage(): ?User
+    public function getCovoiturage(): ?Ride
     {
         return $this->covoiturage;
     }
 
-    public function setCovoiturage(?User $covoiturage): static
+    public function setCovoiturage(?Ride $covoiturage): static
     {
         $this->covoiturage = $covoiturage;
 

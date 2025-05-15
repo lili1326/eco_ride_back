@@ -17,57 +17,57 @@ class Ride
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])] 
+    #[Groups(['ride:read', 'ride:write','review:read'])] 
     private ?\DateTimeImmutable $date_depart = null;
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])] 
+    #[Groups(['ride:read', 'ride:write','review:read'])] 
     private ?\DateTimeImmutable $heure_depart = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     private ?string $lieu_depart = null;
 
    
 
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
-    #[Groups(['ride:read', 'ride:write'])] 
+    #[Groups(['ride:read', 'ride:write','review:read'])] 
     private ?\DateTimeImmutable $heure_arrivee = null;
     #[Groups(['ride:read', 'ride:write'])]
     #[ORM\Column(length: 255)]
     
     private ?string $lieu_arrivee = null;
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     #[ORM\Column(nullable: true)]
   
     private ?int $note_conducteur = null;
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     #[ORM\Column]
      
     private ?int $nb_place = null;
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     #[ORM\Column]
      
     private ?int $prix_personne = null;
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     #[ORM\Column]
      
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     private ?\DateTimeImmutable $updateAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'rides')]
     #[ORM\JoinColumn(nullable: false)]   
-    #[Groups(['ride:read'])]
+     #[Groups(['review:read', 'review:write','review:read'])]
     private ?User $conducteur = null;
 
-    #[Groups(['ride:read','ride:write'])]
+    #[Groups(['ride:read','ride:write','review:read'])]
     #[ORM\ManyToOne(targetEntity: Car::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Car $voiture = null;
@@ -76,13 +76,18 @@ class Ride
      */
     #[ORM\OneToMany(targetEntity: Participe::class, mappedBy: 'covoiturage')]
     private Collection $participes;
-
+/**
+ * @var Collection<int, Review>
+ */
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Review::class)]
 private Collection $reviews;
 
    #[ORM\Column(length: 255)]
      #[Groups(['ride:read','ride:write'])]
 private ?string $statut = 'en_attente';
+
+#[Groups(['ride:read'])]
+private ?bool $avisDejaLaisse = null;
 
     public function __construct()
     {
@@ -282,5 +287,28 @@ public function setStatut(string $statut): self
     $this->statut = $statut;
     return $this;
 }
+
+public function getReviews(): Collection
+{
+    return $this->reviews;
+}
      
+
+public function isAvisDejaLaisse(): ?bool
+{
+    return $this->avisDejaLaisse;
+}
+
+public function setAvisDejaLaisse(?bool $avisDejaLaisse): static
+{
+    $this->avisDejaLaisse = $avisDejaLaisse;
+    return $this;
+}
+
+
+#[Groups(['ride:read'])]
+public function getConducteurId(): ?int
+{
+    return $this->conducteur?->getId();
+}
 }

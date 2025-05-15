@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Review;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User;
 
 /**
  * @extends ServiceEntityRepository<Review>
@@ -15,7 +16,15 @@ class ReviewRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Review::class);
     }
-
+public function findByConducteur(User $conducteur): array
+{
+    return $this->createQueryBuilder('r')
+        ->andWhere('r.conducteur = :user')
+        ->setParameter('user', $conducteur)
+        ->orderBy('r.createdAt', 'DESC')
+        ->getQuery()
+        ->getResult();
+}
     //    /**
     //     * @return Review[] Returns an array of Review objects
     //     */
