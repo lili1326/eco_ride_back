@@ -132,6 +132,34 @@ public function mesAvis(): JsonResponse
 }
 
 
+
+#[Route('/recus', name: 'recus', methods: ['GET'])]
+public function avisRecus(): JsonResponse
+{
+    $conducteur = $this->getUser();
+    if (!$conducteur) {
+        return new JsonResponse(['error' => 'Non authentifié'], 401);
+    }
+
+    $avis = $this->repository->findBy(['conducteur' => $conducteur]);
+
+    $json = $this->serializer->serialize(
+        $avis,
+        'json',
+        ['groups' => ['review:read'], 'enable_max_depth' => true]
+    );
+
+    return new JsonResponse($json, 200, [], true);
+}
+
+
+
+
+
+
+
+
+
     #[Route('/{id}', name: 'show', methods: 'GET')]
 
     #[OA\Get(
@@ -239,6 +267,27 @@ public function mesAvis(): JsonResponse
 
         return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
+
+ #[Route('/conducteur/{id}', name: 'avis_conducteur', methods: ['GET'])]
+public function avisParConducteur(int $id): JsonResponse
+{
+    $conducteur = $this->manager->getRepository(User::class)->find($id);
+
+    if (!$conducteur) {
+        return new JsonResponse(['error' => 'Conducteur introuvable'], 404);
+    }
+
+    $avis = $this->repository->findBy(['conducteur' => $conducteur]);
+
+    $json = $this->serializer->serialize(
+        $avis,
+        'json',
+        ['groups' => ['review:read'], 'enable_max_depth' => true]
+    );
+
+    return new JsonResponse($json, 200, [], true);
+}
+
 
     }
        
