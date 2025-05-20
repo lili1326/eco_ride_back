@@ -2,7 +2,10 @@
 
 namespace App\Security;
 
+
 use App\Repository\UserRepository;
+ 
+
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\{
@@ -32,6 +35,8 @@ class ApiTokenAuthenticator extends AbstractAuthenticator
         if (null === $apiToken) {
             throw new CustomUserMessageAuthenticationException('No API token provided');
         }
+
+ 
 
         $user = $this->repository->findOneBy(['apiToken' => $apiToken]);
         if (null === $user) {

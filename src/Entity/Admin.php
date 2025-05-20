@@ -35,6 +35,10 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $pseudo = null;
 
+
+     #[ORM\Column(length: 255)]
+    private ?string $apiToken;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,5 +124,15 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    
+    public function getApiToken(): ?string
+{
+    return $this->apiToken;
+}
+
+ 
+public function setApiToken(string $token): static
+{
+    $this->apiToken = $token;
+    return $this;
+}
 }

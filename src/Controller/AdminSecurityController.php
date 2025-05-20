@@ -71,17 +71,40 @@ class AdminSecurityController extends AbstractController
         responses: [new OA\Response(response: 200, description: 'Connexion réussie')]
     )]
     #[Route('/login', name: 'login', methods: ['POST'])]
-    public function login(#[CurrentUser] ?Admin $admin): JsonResponse
-    {
-        if (null === $admin) {
-            return new JsonResponse(['message' => 'Identifiants manquants'], Response::HTTP_UNAUTHORIZED);
-        }
+public function login(Request $request): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
 
-        return new JsonResponse([
-            'admin' => $admin->getUserIdentifier(),
-            'roles' => $admin->getRoles(),
-        ]);
+    $email = $data['username'] ?? null;
+    $password = $data['password'] ?? null;
+
+    if (!$email || !$password) {
+        return new JsonResponse(['message' => 'Identifiants manquants'], Response::HTTP_BAD_REQUEST);
     }
+
+    $admin = $this->manager->getRepository(Admin::class)->findOneBy(['email' => $email]);
+
+    if (!$admin) {
+        return new JsonResponse(['message' => 'Admin introuvable'], Response::HTTP_UNAUTHORIZED);
+    }
+
+    if (!$this->passwordHasher->isPasswordValid($admin, $password)) {
+        return new JsonResponse(['message' => 'Mot de passe invalide'], Response::HTTP_UNAUTHORIZED);
+    }
+
+     
+    if (!$admin->getApiToken()) {
+        $admin->setApiToken(bin2hex(random_bytes(20)));
+        $this->manager->flush();
+    }
+
+    return new JsonResponse([
+        'admin' => $admin->getEmail(),
+        'token' => $admin->getApiToken(),
+        'roles' => $admin->getRoles()
+    ]);
+}
+
 
     #[OA\Get(
         path: '/api/admin/me',

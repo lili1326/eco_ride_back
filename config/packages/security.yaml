@@ -19,7 +19,7 @@ security:
       pattern: ^/api/admin
       stateless: true
       provider: admin_provider
-      custom_authenticator: App\Security\ApiAdminAuthenticator
+      custom_authenticator: App\Security\ApiTokenAdminAuthenticator
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
