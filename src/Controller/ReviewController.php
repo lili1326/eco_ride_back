@@ -288,6 +288,26 @@ public function avisParConducteur(int $id): JsonResponse
     return new JsonResponse($json, 200, [], true);
 }
 
+#[Route('/conducteur/{id<\d+>}/moyenne', name: 'moyenne_conducteur', methods: ['GET'])]
+public function moyenneNoteConducteur(int $id): JsonResponse
+{
+    $conducteur = $this->manager->getRepository(User::class)->find($id);
+    if (!$conducteur) {
+        return new JsonResponse(['error' => 'Conducteur introuvable'], 404);
+    }
 
+    $avis = $this->repository->findBy(['conducteur' => $conducteur]);
+
+    $total = count($avis);
+    $moyenne = $total > 0
+        ? round(array_sum(array_map(fn($r) => $r->getNote(), $avis)) / $total, 2)
+        : null;
+
+    return new JsonResponse([
+        'conducteur_id' => $id,
+        'note_moyenne' => $moyenne,
+        'nombre_avis' => $total
+    ]);
+}
     }
        
