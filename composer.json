@@ -80,13 +80,8 @@
          "post-install-cmd": [],
   "post-update-cmd": []
 },
-        "post-install-cmd": [
-            "@auto-scripts"
-        ],
-        "post-update-cmd": [
-            "@auto-scripts"
-        ]
-    },
+      
+    
     "conflict": {
         "symfony/symfony": "*"
     },
