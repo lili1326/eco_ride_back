@@ -1,25 +1,27 @@
 <?php
+
+namespace App\Command;
+
 use App\Repository\RideRepository;
-use MongoDB\Client as MongoClient;
+use MongoDB\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
- 
 
 #[AsCommand(name: 'sync:mysql-to-mongo')]
 class SyncMysqlToMongoCommand extends Command
 {
     public function __construct(
-        private RideRepository $rideRepo,
-        private MongoClient $mongoClient
+        private RideRepository $rideRepo
     ) {
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $db = $this->mongoClient->selectDatabase('eco_ride');
+        $mongoClient = new Client(getenv('MONGODB_URL'));
+        $db = $mongoClient->selectDatabase('eco_ride');
         $collection = $db->selectCollection('stats');
 
         // Regrouper les covoiturages par jour
