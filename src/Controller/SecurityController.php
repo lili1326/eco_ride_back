@@ -71,9 +71,12 @@ public function register(Request $request): JsonResponse
     $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
     $user->setCreatedAt(new DateTimeImmutable());
 
+    try {
     $this->manager->persist($user);
     $this->manager->flush();
-
+} catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+    return new JsonResponse(['error' => 'Email déjà utilisé.'], Response::HTTP_CONFLICT);
+}
 
       //  SEULEMENT si MONGODB_URL est défini (ex: en local ou si bien configuré)
     $mongoUrl = $_ENV['MONGODB_URL'] ?? getenv('MONGODB_URL');
