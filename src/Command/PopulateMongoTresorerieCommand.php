@@ -22,22 +22,10 @@ class PopulateMongoTresorerieCommand extends Command
         parent::__construct();
     }
 
-private function getMongoClient(): \MongoDB\Client
-{
-    $uri = $_ENV['MONGODB_URL'] ?? getenv('MONGODB_URL') ?? trim(shell_exec('echo $MONGODB_URL'));
-
-    if (!$uri) {
-        throw new \RuntimeException('MongoDB connection string not found in environment variables.');
-    }
-
-    return new \MongoDB\Client($uri);
-}
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         //$client = new Client("mongodb://localhost:27017");
-       // $client = new \MongoDB\Client($_SERVER['MONGODB_URL']);
-       $client = $this->getMongoClient();
+        $client = new \MongoDB\Client($_SERVER['MONGODB_URL']);
         $collection = $client->selectCollection('covoiturage', 'tresorerie');
 
         $users = $this->entityManager->getRepository(User::class)->findAll();

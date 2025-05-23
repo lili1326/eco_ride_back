@@ -74,6 +74,11 @@ public function register(Request $request): JsonResponse
     $this->manager->persist($user);
     $this->manager->flush();
 
+
+      //  SEULEMENT si MONGODB_URL est défini (ex: en local ou si bien configuré)
+    $mongoUrl = $_ENV['MONGODB_URL'] ?? getenv('MONGODB_URL');
+    if ($mongoUrl) {
+        try {
     // Création du wallet en MongoDB
     $mongo = new MongoClient('mongodb://localhost:27017');  
     $walletCollection = $mongo->selectCollection('covoiturage', 'wallet');
@@ -87,6 +92,11 @@ public function register(Request $request): JsonResponse
             'date' => new UTCDateTime()
         ]]
     ]);
+      } catch (\Throwable $e) {
+            //  En prod on ignore l’erreur mongo pour ne pas bloquer l’inscription
+            // Optionnel : logger l'erreur
+        }
+    }
 
     return new JsonResponse(
         [
