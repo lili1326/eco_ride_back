@@ -30,6 +30,7 @@ class CreateAdminCommand extends Command
         $admin->setPseudo('ecoadmin');
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setPassword($this->hasher->hashPassword($admin, 'Ecoride21+'));
+         $admin->setApiToken(bin2hex(random_bytes(20))); //  Génération du token
 
         $this->em->persist($admin);
         $this->em->flush();
