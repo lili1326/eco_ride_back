@@ -45,6 +45,7 @@ class AdminSecurityController extends AbstractController
         $admin = $this->serializer->deserialize($request->getContent(), Admin::class, 'json');
         $admin->setPassword($this->passwordHasher->hashPassword($admin, $admin->getPassword()));
         $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setApiToken(bin2hex(random_bytes(20))); //  Génération du token
 
         $this->manager->persist($admin);
         $this->manager->flush();
@@ -52,6 +53,7 @@ class AdminSecurityController extends AbstractController
         return new JsonResponse([
             'admin' => $admin->getUserIdentifier(),
             'roles' => $admin->getRoles(),
+            'token' => $admin->getApiToken()
         ], Response::HTTP_CREATED);
     }
 

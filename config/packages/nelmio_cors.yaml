@@ -2,7 +2,9 @@ nelmio_cors:
   defaults:
     allow_origin:
       - http://localhost:3000
+      - http://127.0.0.1:5500
       - https://eco-ride-front.vercel.app
+      - https://eco-ride-front-git-main-aurelies-projects-dcbacd1a.vercel.app
     allow_headers: ["Content-Type", "Authorization", "X-AUTH-TOKEN"]
     allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     max_age: 3600
@@ -12,7 +14,9 @@ nelmio_cors:
     "^/api/":
       allow_origin:
         - http://localhost:3000
+        - http://127.0.0.1:5500
         - https://eco-ride-front.vercel.app
+        - https://eco-ride-front-git-main-aurelies-projects-dcbacd1a.vercel.app
       allow_headers: ["Content-Type", "Authorization", "X-AUTH-TOKEN"]
       allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
       allow_credentials: true
