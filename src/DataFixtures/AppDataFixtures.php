@@ -14,7 +14,7 @@ use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture
+class AppDataFixtures extends Fixture
 {
     private UserPasswordHasherInterface $hasher;
 
