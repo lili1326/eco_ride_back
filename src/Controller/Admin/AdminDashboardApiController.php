@@ -34,7 +34,7 @@ final class AdminDashboardApiController extends AbstractController
     public function getCreditsPerDay(): JsonResponse
     {
         //connection à la base de donnée mongodb
-        $mongo = new MongoClient("mongodb://localhost:27017");
+         $mongo = new MongoClient($_ENV['MONGODB_URL']);
         //séléction de la collection trésorerie,dans la base covoiturage
         $tresorerie = $mongo->selectCollection("covoiturage", "tresorerie");
 

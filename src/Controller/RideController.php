@@ -344,7 +344,7 @@ foreach ($ride->getParticipes() as $p) {
     }
 
     if ($newStatut === 'termine') {
-        $mongo = new MongoClient("mongodb://localhost:27017");
+         $mongo = new MongoClient($_ENV['MONGODB_URL']);
         $wallets = $mongo->selectCollection("covoiturage", "wallet");
         $tresorerie = $mongo->selectCollection("covoiturage", "tresorerie");
 
