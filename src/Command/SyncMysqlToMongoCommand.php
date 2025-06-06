@@ -20,7 +20,7 @@ class SyncMysqlToMongoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $mongoClient = new Client(getenv('MONGODB_URL'));
+        $mongoClient = new \MongoDB\Client($_ENV['MONGODB_URL']);
         $db = $mongoClient->selectDatabase('eco_ride');
         $collection = $db->selectCollection('stats');
 

@@ -65,3 +65,4 @@ final class AdminDashboardApiController extends AbstractController
         return new JsonResponse($results);
     }
 }
+  
