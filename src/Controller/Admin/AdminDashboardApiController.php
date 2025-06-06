@@ -64,5 +64,25 @@ final class AdminDashboardApiController extends AbstractController
 
         return new JsonResponse($results);
     }
-}
+
   
+#[Route('/rides-stats', name: 'rides_stats', methods: ['GET'])]
+public function getRidesStats(): JsonResponse
+{
+    $mongo = new MongoClient($_ENV['MONGODB_URL']);
+    $collection = $mongo->selectCollection('eco_ride', 'stats');
+
+    $cursor = $collection->find([], ['sort' => ['date' => 1]]);
+    $results = [];
+
+    foreach ($cursor as $entry) {
+        $results[] = [
+            'jour' => $entry['date'],
+            'nb' => $entry['nb'],
+            'gain' => $entry['gain']
+        ];
+    }
+
+    return new JsonResponse($results);
+}
+}
