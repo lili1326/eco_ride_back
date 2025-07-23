@@ -41,13 +41,16 @@ class RideRepository extends ServiceEntityRepository
 //        ;
 //    }
 //POUR AFFICHER TOUS LES TRAJETS
+// Méthode pour afficher tous les trajets filtrés selon des critères facultatifs (lieu de départ, arrivée, date)
 public function findByCriteria(?string $depart, ?string $arrivee, ?string $date): array
 {
+// Création d’un QueryBuilder pour construire dynamiquement une requête SQL (sur l’entité Ride alias "r")
     $qb = $this->createQueryBuilder('r');
 
     if ($depart) {
+// ...on ajoute une condition LIKE pour filtrer les trajets qui contiennent ce texte dans le champ "lieu_depart"
         $qb->andWhere('r.lieu_depart LIKE :depart')
-           ->setParameter('depart', '%' . $depart . '%');
+           ->setParameter('depart', '%' . $depart . '%');// %...% = recherche partielle (ex: "Par" trouve "Paris")
     }
 
     if ($arrivee) {
@@ -56,11 +59,12 @@ public function findByCriteria(?string $depart, ?string $arrivee, ?string $date)
     }
 
     if ($date) {
+ // ...on ajoute une condition stricte sur la date de départ (égalité exacte, pas une recherche partielle)
         $qb->andWhere('r.date_depart = :date')
-           ->setParameter('date', new \DateTimeImmutable($date));
+           ->setParameter('date', new \DateTimeImmutable($date));// conversion de la chaîne en objet DateTime
     }
-
-    return $qb->orderBy('r.date_depart', 'ASC')->getQuery()->getResult();
+// Trie les résultats par date de départ croissante (la plus ancienne en premier)
+    return $qb->orderBy('r.date_depart', 'ASC')->getQuery()->getResult();//Exécute la requête et renvoie un tableau de résultats
 }
 
 }

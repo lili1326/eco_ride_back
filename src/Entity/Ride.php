@@ -37,7 +37,7 @@ class Ride
     #[ORM\Column(type: Types::TIME_IMMUTABLE)]
     #[Groups(['ride:read', 'ride:write','review:read'])] 
     private ?\DateTimeImmutable $heure_arrivee = null;
-    #[Groups(['ride:read', 'ride:write'])]
+    #[Groups(['ride:read', 'ride:write','review:read'])]
     #[ORM\Column(length: 255)]
     
     private ?string $lieu_arrivee = null;

@@ -35,7 +35,7 @@ class Car
     private ?string $immatriculation = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['car:read', 'car:write'])]
+    #[Groups(['car:read', 'car:write', 'ride:read'])]
     private ?string $couleur = null;
 
     #[ORM\Column(length: 255)]

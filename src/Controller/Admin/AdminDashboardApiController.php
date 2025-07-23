@@ -69,20 +69,30 @@ final class AdminDashboardApiController extends AbstractController
 #[Route('/rides-stats', name: 'rides_stats', methods: ['GET'])]
 public function getRidesStats(): JsonResponse
 {
+    // Connexion à la base MongoDB avec l’URL définie dans le fichier .env
     $mongo = new MongoClient($_ENV['MONGODB_URL']);
+
+    // Sélection de la base de données "eco_ride" et de la collection "stats"
     $collection = $mongo->selectCollection('eco_ride', 'stats');
 
+     // Requête MongoDB : récupère tous les documents triés par date croissante
     $cursor = $collection->find([], ['sort' => ['date' => 1]]);
+
+    // Initialisation d’un tableau pour stocker les résultats formatés
     $results = [];
 
+    // Parcours des résultats MongoDB
     foreach ($cursor as $entry) {
+        // Stocke les données utiles dans un tableau associatif lisible
         $results[] = [
-            'jour' => $entry['date'],
-            'nb' => $entry['nb'],
-            'gain' => $entry['gain']
+            'jour' => $entry['date'],// Date du jour
+            'nb' => $entry['nb'],// Nombre de trajets ce jour-là
+            'gain' => $entry['gain']// Gain total pour ce jour
+
         ];
     }
 
+     // Retourne les résultats sous forme de réponse JSON pour l’API
     return new JsonResponse($results);
 }
 }

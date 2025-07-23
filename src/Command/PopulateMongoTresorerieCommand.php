@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
+use MongoDB\BSON\UTCDateTime;
 
 #[AsCommand(
     name: 'app:populate-mongo-tresorerie',

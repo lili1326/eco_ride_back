@@ -62,20 +62,26 @@ class SecurityController extends AbstractController
         ]
     )]
         
- 
+ // Déclare une route accessible à l’URL "/registration" en méthode POST
 #[Route('/registration', name: 'registration', methods: 'POST')]
 
+// Fonction appelée quand cette route est sollicitée
 public function register(Request $request): JsonResponse
 {
+// Désérialise le contenu JSON de la requête en un objet User (grâce au composant Serializer)
     $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
+// Hash le mot de passe de l'utilisateur avant de le stocker en base de données (sécurité)
     $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
+// Enregistre la date actuelle comme date de création du compte
     $user->setCreatedAt(new DateTimeImmutable());
 
     try {
+// Enregistre l'utilisateur en base de données
     $this->manager->persist($user);
     $this->manager->flush();
+// Si l'email est déjà utilisé (clé unique en base), on retourne une erreur JSON
 } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-    return new JsonResponse(['error' => 'Email déjà utilisé.'], Response::HTTP_CONFLICT);
+    return new JsonResponse(['error' => 'Email déjà utilisé.'], Response::HTTP_CONFLICT);// Code HTTP 409 = conflit
 }
 
       //  SEULEMENT si MONGODB_URL est défini (ex: en local ou si bien configuré)
@@ -103,15 +109,22 @@ public function register(Request $request): JsonResponse
 
     return new JsonResponse(
         [
+// Renvoie l'identifiant de l'utilisateur  
             'user'     => $user->getUserIdentifier(),
+
+// Renvoie le token d'authentification pour les appels API  
             'apiToken' => $user->getApiToken(),
+
+// Renvoie les rôles pour gérer les droits
             'roles'    => $user->getRoles(),
         ],
+
+ // Code HTTP 201 :  créée avec succès
         Response::HTTP_CREATED
     );
 }
 
-
+// Route API de connexion, attend une requête POST sur /login
     #[Route('/login', name: 'login', methods: 'POST')]
 
     #[OA\Post(
@@ -146,17 +159,19 @@ public function register(Request $request): JsonResponse
         
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
+// Si aucun utilisateur n’est authentifié (mauvais identifiants ou rien envoyé)
         if (null === $user) {
-            return new JsonResponse(['message' => 'Missing credentials'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['message' => 'Missing credentials'], // Message d’erreur
+            Response::HTTP_UNAUTHORIZED);// Code HTTP 401 : non autorisé
         }
-
+// Si l’utilisateur est authentifié, on retourne ses infos au format JSON
         return new JsonResponse([
             'user'  => $user->getUserIdentifier(),
             'apiToken' => $user->getApiToken(),
             'roles' => $user->getRoles(),
         ]);
     }
-
+// Route GET protégée (auth requise), pour afficher les infos du compte connecté
     #[Route('/account/me', name: 'me', methods: 'GET')]
 
     #[OA\Get(
@@ -184,13 +199,15 @@ public function register(Request $request): JsonResponse
   
     public function me(): JsonResponse
     {
+// Récupère l'utilisateur connecté (grâce au token d'authentification)
         $user = $this->getUser();
-
+// Sérialise l'objet $user en JSON, en ne gardant que les champs du groupe "user:read"
         $responseData = $this->serializer->serialize($user, 'json',['groups' => ['user:read']]);
-
+ // Retourne la réponse JSON avec un code HTTP 200 (OK) et en précisant que les données sont déjà encodées
         return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
 
+// Route PUT pour modifier les infos du compte connecté
     #[Route('/account/edit', name: 'edit', methods: 'PUT')]
 
     #[OA\Put(
@@ -219,20 +236,24 @@ public function register(Request $request): JsonResponse
    
     public function edit(Request $request): JsonResponse
     {
+// Désérialise le JSON envoyé par le front pour mettre à jour l'objet User existant
+// OBJECT_TO_POPULATE permet de modifier l'utilisateur connecté sans en créer un nouveau
         $user = $this->serializer->deserialize(
             $request->getContent(),
             User::class,
             'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $this->getUser()],
         );
+// Met à jour la date de modification du compte
         $user->setUpdatedAt(new DateTimeImmutable());
 
+// Si un mot de passe est fourni, on le hash avant de le stocker (sécurité)
         if (isset($request->toArray()['password'])) {
             $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
         }
-
+// Enregistre les modifications dans la base de données
         $this->manager->flush();
-
+ // Renvoie une réponse vide avec un code HTTP 204 (No Content)
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 

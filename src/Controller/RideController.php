@@ -24,10 +24,10 @@ use MongoDB\BSON\UTCDateTime;
 final class RideController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $manager,
-        private RideRepository $repository,
-        private SerializerInterface $serializer,
-        private UrlGeneratorInterface $urlGenerator,
+        private EntityManagerInterface $manager,//Pour enregistrer les objets en base (persist, flush)
+        private RideRepository $repository,//Pour rechercher des trajets (Ride)
+        private SerializerInterface $serializer,//Pour convertir JSON ⇄ Objet PHP (Ride)
+        private UrlGeneratorInterface $urlGenerator,//Pour générer dynamiquement des URLs Symfony
          
     ) {
     }
@@ -81,13 +81,14 @@ final class RideController extends AbstractController
 
     // 2. Désérialisation avec le groupe 'ride:write'
     $ride = $this->serializer->deserialize(
-        $request->getContent(),
-        Ride::class,
-        'json',
-        ['groups' => ['ride:write'],
-        'enable_max_depth' => true,]
-        
-    );
+    $request->getContent(),           //  Récupère le contenu brut (JSON) de la requête HTTP
+    Ride::class,                      //  Je créé un objet de type Ride (entité Ride)
+    'json',                           //  Le format des données à convertir (ici JSON)
+    [
+        'groups' => ['ride:write'],   //  Groupe de sérialisation : seuls les champs autorisés dans 'ride:write' seront pris en compte
+        'enable_max_depth' => true,   //  Évite les références circulaires lors de la désérialisation (relations imbriquées entre entités)
+    ]
+);
 //  Associer la voiture
 if ($carIri) {
     $carId = basename($carIri); // "/api/car/4" → "4"
@@ -110,12 +111,14 @@ if ($carIri) {
     $this->manager->flush();
 
     // 5. Sérialisation avec le groupe 'ride:read'
-    $responseData = $this->serializer->serialize(
-        $ride,
-        'json',
-        ['groups' => ['ride:read'],
-        'enable_max_depth' => true,]
-    );
+    $responseData = $this->serializer->serialize( // Utilise le service de sérialisation Symfony pour convertir un objet PHP en JSON
+    $ride,                                     // L'objet Ride à transformer (trajet à envoyer au front)
+    'json',                                    // Format de sortie : JSON
+    [                                          // Options de sérialisation :
+        'groups' => ['ride:read'],             // Seuls les champs marqués avec @Groups("ride:read") seront inclus dans le JSON
+        'enable_max_depth' => true,            // Évite les problèmes de boucles infinies avec les relations imbriquées  
+    ]
+);
 
     // 6. Réponse
    // $location = $this->urlGenerator->generate(
@@ -125,7 +128,12 @@ if ($carIri) {
    // );
 
    // return new JsonResponse($responseData, Response::HTTP_CREATED, ['Location' => $location], true);
-   return new JsonResponse($responseData, Response::HTTP_CREATED, [], true);
+    return new JsonResponse(
+    $responseData,                 // Les données JSON préparées
+    Response::HTTP_CREATED,       // Code HTTP 201 (création réussie)
+    [],                            // Pas de header personnalisé
+    true                           // Données déjà encodées en JSON
+);
 }
 
     
@@ -287,16 +295,17 @@ if ($carIri) {
             )
         ]
     )]
-
+//  Contrôleur qui gère la recherche de trajets accessibles au public
     public function getPublicRides(
-        Request $request,
-        RideRepository $rideRepository,
-        SerializerInterface $serializer
+        Request $request,//Permet d'accéder aux paramètres passés dans l'URL (GET)
+        RideRepository $rideRepository,//Utilisé pour effectuer une recherche en base de données
+        SerializerInterface $serializer// Sert à convertir les objets PHP (Ride) en JSON lisible côté front
     ): JsonResponse {
+ // On récupère les paramètres de recherche depuis l’URL 
         $depart = $request->query->get('depart');
         $arrivee = $request->query->get('arrivee');
         $date = $request->query->get('date');
-    
+   // Appel de la méthode personnalisée dans RideRepository pour filtrer les trajets selon les critères reçus   
         $rides = $rideRepository->findByCriteria($depart, $arrivee, $date);
     
         $json = $serializer->serialize($rides, 'json', ['groups' => 'ride:read']);
