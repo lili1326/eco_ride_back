@@ -305,8 +305,16 @@ if ($carIri) {
         $depart = $request->query->get('depart');
         $arrivee = $request->query->get('arrivee');
         $date = $request->query->get('date');
+          // nouveaux
+    $energie  = $request->query->get('energie');   // "Essence", ...
+    $prixMax  = $request->query->get('prixMax');   // ex: "20"
+    $dureeMax = $request->query->get('dureeMax');  // minutes
+    $noteMin  = $request->query->get('noteMin');   // 0..5 (optionnel si pas encore implémenté)
    // Appel de la méthode personnalisée dans RideRepository pour filtrer les trajets selon les critères reçus   
-        $rides = $rideRepository->findByCriteria($depart, $arrivee, $date);
+        $rides = $rideRepository->findByCriteria($depart, $arrivee, $date,$energie,
+        $prixMax,
+        $dureeMax,
+        $noteMin);
     
         $json = $serializer->serialize($rides, 'json', ['groups' => 'ride:read']);
         return new JsonResponse($json, 200, [], true); // le `true` ici permet d'envoyer du JSON déjà sérialisé
